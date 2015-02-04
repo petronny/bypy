@@ -118,7 +118,7 @@ __updated__ = '2014-01-13'
 # ByPy default values
 DefaultSliceInMB = 20
 DefaultSliceSize = 20 * OneM
-DefaultDlChunkSize = 20 * OneM
+DefaultDlChunkSize = 1 * OneM
 RetryDelayInSec = 10
 
 # Baidu PCS constants
@@ -995,6 +995,8 @@ class ByPy(object):
 				perr("HTTP Status Code: {}".format(sc))
 				self.__print_error_json(r)
 				perr("Website returned: {}".format(rb(r)))
+	def pycurl_debug(self, debug_type, debug_msg):
+		print "curl(%d): %s" % (debug_type, debug_msg)
 
 	# always append / replace the 'access_token' parameter in the https request
 	def __request_work(self, url, pars, act, method, actargs = None, addtoken = True, dumpex = True, **kwargs):
@@ -1017,6 +1019,7 @@ class ByPy(object):
 				url=url+'?'
 				for i in parsnew:
 					url=url+i+'='+parsnew[i]+'&'
+				url=url[0:-1]
 				kwnew = kwargs.copy()
 				headers=[]
 				for i in kwnew['headers']:
@@ -1028,6 +1031,8 @@ class ByPy(object):
 				pyc.setopt(pycurl.HTTPHEADER, headers)
 				pyc.setopt(pyc.WRITEDATA, abuffer)
 				pyc.setopt(pyc.FOLLOWLOCATION, True)
+				pyc.setopt(pyc.VERBOSE, 1)
+				pyc.setopt(pyc.DEBUGFUNCTION, self.pycurl_debug)
 				pyc.perform()
 				sc =  pyc.getinfo(pyc.HTTP_CODE)
 				r = abuffer.getvalue()
